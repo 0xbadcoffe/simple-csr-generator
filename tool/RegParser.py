@@ -63,17 +63,17 @@ class RegParser(object):
         self.fields = list(regInfoRaw[reg].keys())
         return self.fields
 
-    def parseOneReg(self, reg, regInfoRaw) -> list:
+    def parseOneReg(self, reg, addr, regInfoRaw) -> list:
         """
             Parser one register and extract all the information about this register
             The output format is as follow:
-            [reg1,
+            [reg1, address,
                [field1, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)],
                [field2, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)],
                ...
             ]
         """
-        regResult = [reg]
+        regResult = [reg, addr]
         fields = self.getAllField(reg, regInfoRaw)
         regInfo = regInfoRaw[reg]
         bit = 0
@@ -100,8 +100,10 @@ class RegParser(object):
         regsInfo = []
         self.openYml()
         regs = self.getAllReg(self.regInfoRaw)
+        addr = 0x0
         for reg in regs:
-            regsInfo.append(self.parseOneReg(reg, self.regInfoRaw))
+            regsInfo.append(self.parseOneReg(reg, addr, self.regInfoRaw))
+            addr = addr + 0x4
         return regsInfo
 
 
