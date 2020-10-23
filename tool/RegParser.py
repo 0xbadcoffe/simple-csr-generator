@@ -13,12 +13,12 @@
 #
 #   The internal format output by the reg parser is a list structure
 #
-#   [[reg1,
+#   [[reg1, address
 #       [field1, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)],
 #       [field2, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)],
 #       ...
 #    ],
-#    [reg2,
+#    [reg2, address
 #       [field1, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)]
 #       [field2, MSb, LSb, SW_TYPE, HW_TYPE, Reset_value, Description(note)]
 #       ...
@@ -29,19 +29,7 @@
 #########################################################################################
 
 import yaml
-
-# Defines the key of the yml file
-TOP     = 'register'
-SIZE    = 'size'
-RESET   = 'reset'
-SWTYPE  = 'swtype'
-HWTYPE  = 'hwtype'
-NOTE    = 'note'
-
-# Other golbal define
-RSVR    = 'RSVR'
-RSVR_NOTE = 'Reserved Field'
-REG_WIDTH   = 32
+from common import *
 
 class RegParser(object):
 
@@ -52,7 +40,7 @@ class RegParser(object):
     def openYml(self):
         """ Open the yml file """
         stream = open(self.yml, 'r')
-        self.regInfoRaw = yaml.load(stream, Loader=yaml.FullLoader)[TOP]
+        self.regInfoRaw = yaml.load(stream, Loader=yaml.FullLoader)['register']
 
     def getAllReg(self, regInfoRaw) -> list:
         """ Get all the registers defined in the yaml file """
@@ -82,11 +70,11 @@ class RegParser(object):
             if field == RSVR:
                 fieldLine = [RSVR, bit + size -1, bit,  'NA' , 'NA', 0x0 , RSVR_NOTE]
             else:
-                size    = fieldInfo[SIZE]
-                reset   = fieldInfo[RESET]
-                swtype  = fieldInfo[SWTYPE]
-                hwtype  = fieldInfo[HWTYPE]
-                note    = fieldInfo[NOTE]
+                size    = fieldInfo['size']
+                reset   = fieldInfo['reset']
+                swtype  = fieldInfo['swtype']
+                hwtype  = fieldInfo['hwtype']
+                note    = fieldInfo['note']
                 fieldLine = [field, bit + size -1, bit, swtype, hwtype, reset, note]
             regResult.append(fieldLine)
             bit += size;

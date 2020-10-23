@@ -11,27 +11,7 @@
 #
 #########################################################################################
 
-from datetime import datetime
-
-# Global Define
-TOP     = 'register'
-REGNAME = 0
-ADDR    = 1
-FNAME   = 0
-MSB     = 1
-LSB     = 2
-SWTYPE  = 3
-HWTYPE  = 4
-RESET   = 5
-NOTE    = 6
-
-INDENT = lambda x: '  ' * x
-
-YEAR = datetime.now().year
-MONTH = datetime.now().month
-DAY = datetime.now().day
-HOUR = datetime.now().hour
-MINUTE = datetime.now().minute
+from common import *
 
 class HtmlWriter(object):
 
