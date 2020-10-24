@@ -11,6 +11,9 @@
 #
 #########################################################################################
 
+import sys
+sys.dont_write_bytecode = True
+
 ############################
 # Date
 ############################
@@ -42,10 +45,28 @@ RSVR        = 'RSVR'
 RSVR_NOTE   = 'Reserved Field'
 REG_WIDTH   = 32
 
+RTL_SUFFIX = '_csr'
+
+LINE_LIMIT = 100
+
 ############################
 # Global Function
 ############################
 INDENT = lambda x: '  ' * x
+
+def addSpace(string, maxlen = 10, end=True):
+    """
+    Add space to the string to make it align
+    parameter:
+        :param maxlen: the max length after adding the space.
+                       If the string is longer then an INDENT is added
+        :param end: if True, add the space at the end, else add the space at the front
+    """
+    lens = len(string)
+    if end:
+        return string + ' ' * (maxlen - lens) if lens < maxlen else string + INDENT(1)
+    else:
+        return ' ' * (maxlen - lens) + string if lens < maxlen else INDENT(1) + string
 
 
 

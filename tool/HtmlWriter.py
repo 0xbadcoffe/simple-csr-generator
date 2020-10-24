@@ -130,7 +130,7 @@ class HtmlWriter(object):
 
 
 if __name__ == "__main__":
-    regsInfo = [['pio_read', ['data', 31, 0, 'R', 'W', 0, 'pio read data']], ['pio_write', ['data', 31, 0, 'W', 'R', 0, 'pio write data']], ['pio_ctrl_status', ['edge_capture_en', 0, 0, 'W', 'R', 0, 'enable edge capturing'], ['RSVR', 1, 1, 'NA', 'NA', 0, 'Reserved Field'], ['edge_captured', 2, 2, 'R', 'W', 0, 'captured edge activity (if any)'], ['RSVR', 31, 3, 'NA', 'NA', 0, 'Reserved Field']]]
+    regsInfo = [['pio_read', 0, ['data', 31, 0, 'R', 'W', 0, 'pio read data']], ['pio_write', 4, ['data', 31, 0, 'W', 'R', 0, 'pio write data']], ['pio_ctrl_status', 8, ['edge_capture_en', 0, 0, 'W', 'R', 0, 'enable edge capturing'], ['RSVR', 1, 1, 'NA', 'NA', 0, 'Reserved Field'], ['edge_captured', 2, 2, 'R', 'W', 0, 'captured edge activity (if any)'], ['RSVR', 31, 3, 'NA', 'NA', 0, 'Reserved Field']]]
     path = '.'
     name = 'pio'
 

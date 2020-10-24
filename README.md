@@ -29,8 +29,8 @@ register:
             <field1>:                   # Field 1 name
                 size: <size>            # Size of the field
                 reset: <reset_value>    # Reset value.
-                swtype: <R|W>           # SW access type
-                hwtype: <R|W>           # HW access type
+                swtype: <R|W>           # SW access type, can be R or W
+                hwtype: <R|W>           # HW access type, can be R or W
                 note: <description of the field>
             <field2>:
                 size: <>
@@ -52,7 +52,9 @@ register:
 
 - The address of the registers are calculated automatically based on the order they are defined in the yaml files.
   In the example below, pio_read_data is 0, pio_write_data is 4, pio_status is 8.
-- The field location is calculated automatically based on the field width. Since register width is fixed to 32 bit, unused bits will be treated as reserved.
+- The field location is calculated automatically based on the field width. Since register width is fixed to 32 bit, unused bits will be treated as reserved and each register can't have more thant 32 bit
+- SW access type can be *R* or *W*. *R* means read only, writing to the the *R* field has no effect. *W* means write-able field. SW read to the register will automatically return the entire register value, regardless of the SW access type.
+- HW access type can be *R* or *W*. *R* means this field is used for configuration. *W* means this field is used for reporting status.
 - **RSVR** keyword is indicate this field is reserved.
 
 ### Example
@@ -116,9 +118,14 @@ input  [WIDTH-1:0]          i_hw_<register_name>_<field_name>   // input status
 output [WIDTH-1:0]          o_hw_<register_name>_<field_name>   // output configuration
 ...
 ```
+
 ### Other signals
 
 ```verilog
 input                       clk         // clock signal
 input                       reset       // reset signal
 ```
+
+### TBD Feature
+
+- [ ] Adde some basic error checking on the input yaml file
