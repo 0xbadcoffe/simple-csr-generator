@@ -86,7 +86,7 @@ class HtmlWriter(object):
         string  = INDENT(2) + '<tr>\n'
         string += INDENT(3) + f'<td>{fieldInfo[FNAME]}</td>\n'
         string += INDENT(3) + f'<td>{fieldInfo[MSB]} - {fieldInfo[LSB]}</td>\n'
-        string += INDENT(3) + f'<td>{fieldInfo[RESET]}</td>\n'
+        string += INDENT(3) + f'<td>{hex(fieldInfo[RESET])}</td>\n'
         string += INDENT(3) + f'<td>{fieldInfo[SWTYPE]}</td>\n'
         string += INDENT(3) + f'<td>{fieldInfo[HWTYPE]}</td>\n'
         string += INDENT(3) + f'<td>{fieldInfo[NOTE]}</td>\n'
@@ -117,7 +117,7 @@ class HtmlWriter(object):
         for regInfo in regsInfo:
             FILE.write(self.OneRegStr(regInfo))
 
-    def writeAll(self):
+    def writeHtml(self):
         """
             Write all the content.
         """
@@ -135,4 +135,4 @@ if __name__ == "__main__":
     name = 'pio'
 
     hwriter = HtmlWriter(regsInfo, name, path)
-    hwriter.writeAll()
+    hwriter.writeHtml()

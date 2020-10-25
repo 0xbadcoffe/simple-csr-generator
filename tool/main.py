@@ -53,7 +53,7 @@ regsInfo = parser.parserAllReg()
 
 # Write the HTML document
 hwriter = HtmlWriter(regsInfo, moduleName, docPath)
-hwriter.writeAll()
+hwriter.writeHtml()
 
 # Write the  Verilog File
 vwriter = VerilogWriter(regsInfo, moduleName, rtlPath)
