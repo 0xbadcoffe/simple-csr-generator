@@ -1,0 +1,36 @@
+register:
+  pio_read:
+    data:
+      size: 32
+      reset: 0x0
+      swtype: R
+      hwtype: W
+      note: pio read data
+  pio_write:
+      data:
+          size: 32
+          reset: 0xdeadbeef
+          swtype: W
+          hwtype: R
+          note: pio write data
+  pio_ctrl_status:
+      level_capture_en:
+          size: 1
+          reset: 0x1
+          swtype: W
+          hwtype: R
+          note: enable level capturing
+      RSVR:
+          size: 15
+      level_captured:
+          size: 1
+          reset: 0x0
+          swtype: R
+          hwtype: W
+          note: level edge activity (if any)
+      sample:
+          size: 14
+          reset: 0xab
+          swtype: W
+          hwtype: W
+          note: a sample field
