@@ -39,7 +39,7 @@ yml = args.yml
 outdir = args.outdir
 
 fileName = os.path.basename(yml)
-filePath = os.path.dirname(yml)
+filePath = os.path.dirname(os.path.abspath(yml))
 moduleName = fileName.replace('.yml', '')
 rtlPath =  filePath + '/' + moduleName + '_csr/rtl' if (outdir == None) else outdir
 docPath =  filePath + '/' + moduleName + '_csr/doc' if (outdir == None) else outdir

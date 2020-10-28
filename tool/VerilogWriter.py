@@ -160,7 +160,7 @@ class VerilogWriter(object):
 
         # readlogic => [[addr, [field0, field1, field2, ...]], ...]
         for info in self.sw_rd_dec:
-            addr  = info[0]
+            addr  = format(info[0], 'x')
             line  = INDENT(3) + f'{self.addr_width}\'h{addr}:{INDENT(1)}o_sw_rddata_next = {{'
             for field in reversed(info[1]): # Need to reverse it in the assignment
                 # breaks the line if it's too long
@@ -197,7 +197,7 @@ class VerilogWriter(object):
                 decDefault += INDENT(4) + signal + ' = 1\'b0;\n'
                 caseContent += INDENT(4) + signal + ' = i_sw_write & i_sw_select;\n'
             if info[1]:
-                decCase += INDENT(3) + str(self.addr_width) + '\'h' + str(addr) + ': begin\n'
+                decCase += INDENT(3) + str(self.addr_width) + '\'h' + str(format(addr, 'x')) + ': begin\n'
                 decCase += caseContent
                 decCase += INDENT(3) + 'end\n'
         self.writeSplitter(FILE, 1, '// Software/Hardware Write Logic\n')

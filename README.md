@@ -229,3 +229,9 @@ input                       reset       // reset signal
 ## Change Log
 
 10/24/2020 - Inital version (Ver 1.0) Created
+
+## License
+
+This project is under MIT License.
+
+Copyright (c) 2020 Heqing Huang
