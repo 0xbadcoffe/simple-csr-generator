@@ -73,7 +73,10 @@ class RegParser(object):
                 size    = fieldInfo['size']
                 reset   = fieldInfo['reset']
                 swtype  = fieldInfo['swtype']
-                hwtype  = fieldInfo['hwtype']
+                if swtype == 'FIFOW' or swtype == 'FIFOR':
+                    hwtype  = 'NA'
+                else:
+                    hwtype  = fieldInfo['hwtype']
                 note    = fieldInfo['note']
                 fieldLine = [field, bit + size -1, bit, swtype, hwtype, reset, note]
             regResult.append(fieldLine)

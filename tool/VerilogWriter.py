@@ -38,6 +38,8 @@ class VerilogWriter(object):
         self.sw_rd_dec  = [] # [[addr, [field0, field1, field2, ...]], ...]
         self.sw_wr_dec  = []  # [[addr, [field0, field1, ...]]] the field is sw write only field
         self.wr_seq_logic = [] # [[reg, field, reset, sw_write?, hw_write?, msb, lsb]]
+        self.fifo_portList = [] # [[direction, width, name], ...]
+        self.fifo_logic = [] # [[addr, [ctrl_signal, data_signal, msb, lsb, type]], ...]
 
     def parseRegInfo(self):
         """
@@ -57,6 +59,7 @@ class VerilogWriter(object):
             sw_rd_dec = []
             sw_wr_dec = []
             wr_seq_logic = []
+            fifo_logic = []
             for fieldInfo in regInfo[2:]:
                 # Extract the field
                 fieldName = fieldInfo[FNAME]
@@ -66,23 +69,44 @@ class VerilogWriter(object):
                 msb = fieldInfo[MSB]
                 reset = fieldInfo[RESET]
                 width = msb - lsb + 1
-                dir = 'i' if hwtype == 'W' else 'o'
-                name = dir + '_hw_' + regName + '_' + fieldName
-                name_q = name + reg_suffix
+
                 if fieldName != RSVR:
-                    self.portList.append([dir, width, name])
-                    self.regs.append([name_q, width])
-                    sw_rd_dec.append(name_q)
-                    if swtype == 'W':
-                        sw_wr_dec.append(name_q)
-                        self.logics.append([name_q + wen_suffix, 1])
-                    if swtype == 'W' or hwtype == 'W':
-                        wr_seq_logic.append([regName, name, reset, swtype == 'W', hwtype == 'W', msb, lsb])
+                    # regular read/write
+                    if swtype == 'W' or swtype == 'R':
+                        dir = 'i' if hwtype == 'W' else 'o'
+                        name = dir + '_hw_' + regName + '_' + fieldName
+                        name_q = name + reg_suffix
+                        self.portList.append([dir, width, name])
+                        self.regs.append([name_q, width])
+                        sw_rd_dec.append(name_q)
+                        if swtype == 'W':
+                            sw_wr_dec.append(name_q)
+                            self.logics.append([name_q + wen_suffix, 1])
+                        if swtype == 'W' or hwtype == 'W':
+                            wr_seq_logic.append([regName, name, reset, swtype == 'W', hwtype == 'W', msb, lsb])
+                    # FIFO read/write
+                    if swtype == 'FIFOR' or swtype == 'FIFOW':
+                        if swtype == 'FIFOR':
+                            dir = 'i'
+                            op  = 'read'
+                        if swtype == 'FIFOW':
+                            dir = 'o'
+                            op  = 'write'
+                        ctrl_signal = f'o_hw_{regName}_{fieldName}_fifo_{op}'
+                        data_signal = f'{dir}_hw_{regName}_{fieldName}_fifo_{op}_data'
+                        self.fifo_portList.append(['o', 1, ctrl_signal])
+                        self.fifo_portList.append([dir, width, data_signal])
+                        fifo_logic.append([ctrl_signal, data_signal, msb, lsb, swtype])
+                        if swtype == 'FIFOR':
+                            sw_rd_dec.append(data_signal)
+                        if swtype == 'FIFOW':
+                            sw_rd_dec.append(f'{width}\'h0')
                 else:
                     sw_rd_dec.append(f"{width}'b0")
             self.sw_rd_dec.append([addr, sw_rd_dec])
             self.sw_wr_dec.append([addr, sw_wr_dec])
             self.wr_seq_logic += wr_seq_logic
+            self.fifo_logic.append([addr, fifo_logic])
 
     def writeSplitter(self, FILE, indent, line, sign='=', width=30):
         """ """
@@ -100,7 +124,7 @@ class VerilogWriter(object):
             :param FILE: File Stream
         """
         string = '(\n'
-        for port in self.portList:
+        for port in self.portList + self.fifo_portList:
             (dir, width, name) = port
             dir = 'input ' if dir == 'i' else 'output'
             addrRange = f'[{width - 1}:0]' if width > 1 else ''
@@ -144,18 +168,44 @@ class VerilogWriter(object):
         string += lines(2)
         FILE.write(string)
 
+    def writeFIFO(self, FILE):
+        """
+        Assign the FIFO related signal
+        """
+        self.writeSplitter(FILE, 1, '// FIFO control\n')
+        fifo_read = lines(1) + INDENT(1) + '// FIFO Read logic\n'
+        fifo_write = lines(1)  + INDENT(1) + '// FIFO Write logic\n'
+
+        # [addr, [ctrl_signal, data_signal, type]]
+        for info in self.fifo_logic:
+            addr = info[0]
+            for item in info[1]:
+                (ctrl_signal, data_signal, msb, lsb, type) = item
+                if type == 'FIFOR':
+                    fifo_read += INDENT(1) + f'assign {ctrl_signal} = i_sw_select & i_sw_read & '
+                    fifo_read += f"(i_sw_address == {self.addr_width}'h{format(addr, 'x')});\n"
+                if type == 'FIFOW':
+                    fifo_write += INDENT(1) + f'assign {ctrl_signal} = i_sw_select & i_sw_write & '
+                    fifo_write += f"(i_sw_address == {self.addr_width}'h{format(addr, 'x')});\n"
+                    fifo_write += INDENT(1) + f'assign {data_signal} = i_sw_wrdata[{msb}:{lsb}];\n'
+        # end part
+        fifo_write += lines(2)
+        FILE.write(fifo_read)
+        FILE.write(fifo_write)
+
     def writeReadLogic(self, FILE):
         """ Write the read logic """
         # Sequential part
         self.writeSplitter(FILE, 1, '// Software Read Logic\n')
         string  = lines(1)
-        string += INDENT(1) + 'always @(posedge clk, posedge reset) begin\n'
+        string += INDENT(1) + 'always @(posedge clk) begin\n'
         string += INDENT(2) + f'if (i_sw_read) o_sw_rddata{reg_suffix} <= o_sw_rddata_next;\n'
         string += INDENT(1) + 'end' + lines(2)
 
         # Combinational part
         string += INDENT(1) + '// read decode logic\n'
         string += INDENT(1) + 'always @(*) begin\n'
+        string += INDENT(2) + f'o_sw_rddata_next = o_sw_rddata;\n'
         string += INDENT(2) + 'case(i_sw_address)\n'
 
         # readlogic => [[addr, [field0, field1, field2, ...]], ...]
@@ -204,9 +254,10 @@ class VerilogWriter(object):
         decode  = lines(1)
         decode += INDENT(1) + '// software write decode Logic\n'
         decode += INDENT(1) + 'always @(*) begin\n'
+        decode += decDefault
         decode += INDENT(2) + 'case(i_sw_address)\n'
         decode += decCase
-        decode += INDENT(3) + 'default: begin;\n'
+        decode += INDENT(3) + 'default: begin\n'
         decode += decDefault
         decode += INDENT(3) + 'end\n'
         decode += INDENT(2) + 'endcase\n'
@@ -237,7 +288,7 @@ class VerilogWriter(object):
         sequential  = lines(1)
         sequential += INDENT(1) + '// write sequential Logic\n'
         sequential += INDENT(1) + '// Software/Hardware Write Logic\n'
-        sequential += INDENT(1) + 'always @(posedge clk, posedge reset) begin\n'
+        sequential += INDENT(1) + 'always @(posedge clk) begin\n'
         sequential += INDENT(2) + 'if (reset) begin\n'
         sequential += reset
         sequential += INDENT(2) + 'end\n'
@@ -287,6 +338,7 @@ class VerilogWriter(object):
         self.writeHWRead(FILE)
         self.writeReadLogic(FILE)
         self.writeWriteLogic(FILE)
+        self.writeFIFO(FILE)
         FILE.write('endmodule\n')
 
 

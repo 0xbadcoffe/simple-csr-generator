@@ -4,10 +4,12 @@
   - [Introduction](#introduction)
   - [Getting Started](#getting-started)
   - [Supported Feature](#supported-feature)
+  - [Access Type](#access-type)
   - [Register Define File Format](#register-define-file-format)
   - [Output Verilog Module](#output-verilog-module)
   - [Limitation](#limitation)
   - [Change Log](#change-log)
+  - [License](#license)
 
 ## Introduction
 
@@ -17,9 +19,13 @@ This is a small python based tool to generate verilog CSR module.
 
 It takes the register information coded in yaml file and generates verilog module, and a HTML based document.
 
+
+
 ### Current Version
 
-Ver 1.0
+Ver 1.1
+
+
 
 ## Getting Started
 
@@ -28,19 +34,19 @@ Ver 1.0
 - Run with Default setting. Output is in the same directory of the yaml file. See [Register Define File Format](#register-define-file-format) section to learn how to write the yml file
 
 ```shell
-$ ./simple-cs-generator <your-yml-file>
+$ ./simple-csr-generator <your-yml-file>
 ```
 
 - Run with an non-default output directory
 
 ```shell
-$ ./simple-cs-generator <your-yml-file> -outdir <your-output-directory>
+$ ./simple-csr-generator <your-yml-file> -outdir <your-output-directory>
 ```
 
 ### Run the example
 
 ```shell
-$ ./simple-cs-generator example/pio.yml
+$ ./simple-csr-generator example/pio.yml
 ```
 
 ### Output
@@ -58,39 +64,70 @@ example
 └── pio.yml                 - the input yaml file
 ```
 
+
+
 ## Supported Feature
 
-Ver 1.0 current support the following feature (or you may want to call some of them limitation)
+Ver 1.1 current support the following feature (or you may want to call some of them limitation)
 
-1. **Register width:** Register width is fixed to 32 bits for Ver 1.0.
+1. **Register width** Register width is fixed to 32 bits for Ver 1.1.
 
-2. **Address:** 
+2. **Address** 
    1. The input address is byte address and should always align to 4 bytes boundary (lower two bits being zero). 
    2. CSR module does NOT check address alignment. It's the user's responsibility to input correct address. Wrong address alignment will cause error.
 
-3. **SW access:**
-   1. CSR supports two SW access to **each field**: **R (Read)** and **W (Write)**.
-      1. **R (Read)** means SW can read this field only, write to this field will be ignored.
-      2. **W (Write)** means SW can read or write to the field, SW can read or write this field.
+3. **SW access**
    2. SW always read or write to the entire register.
       1. When read, CSR will return the value for the whole register regardless of the access type of the field.
       2. When write, CSR will write to the entire register, however, only field with W access type will have their value updated. R-only field will ignore the write value
       3. Field access is not supported yet. If you want to write to a specific field, you can do a read-modified-write. (unless there is a side effect to read a field but we don't have this feature right now)
 
-4. **HW access:**
-   1. CSR supports two HW access to **each field**: **R (Read)** and **W (Write)**.
-      1. **R (Read)** (status register/field) means hardware logic can only read this field.
-      2. **W (Write)** (control register/field) means hardware logic can only write to this field. (HW can NOT read the field)
-      3. Both Hardware R and W are not supported yet in Ver 1.0
+4. **HW access**
    2. For W type field, the hardware is responsible for driving the correct value to CSR all the time, register value will be updated to the value driven by HW at every clock
 
-5. **Supported Access Type comb:**
-   | SW | HW | Valid | Comment          |
-   |:--:|:--:|:-----:|------------------|
-   | R  | R  |  No   | Not Supported    |
-   | R  | W  |  Yes  | Status Register  |
-   | W  | R  |  Yes  | Control Register |
-   | W  | W  |  Yes  | Not Supported    |
+
+
+
+## Access Type
+
+### Software Access Type
+
+CSR supports the following access type
+
+1. **R - Read Only** SW can only read this field , write to this field will be ignored.
+
+2. **W - Write/Read** SW can read or write to the field.
+
+3. **FIFOR - FIFO Read** This field is connected to a FIFO, read to this field will return the data in the FIFO.
+
+    - The FIFO needs to be a FWFT (First Word Fall Through) FIFO. 
+    - SW is responsible for making sure the FIFO is not empty when read. Reading from an empty FIFO will have undefined behavior depending on the FIFO implementation.
+    - Write to this field will be ignored
+
+4. **FIFOW - FIFO Write** This field is connected to a FIFO, write to this field will write the data into the FIFO
+
+    - SW is responsible for making sure the FIFO is not full when write. Writing to a full FIFO will have undefined behavior depending on the FIFO implementation.
+
+    - Read to this field will return zero
+
+### Hardware Access Type
+
+CSR supports the following HW access type
+
+1. **R - Read Only** (status register/field) means hardware logic can only read this field.
+2. **W - Write Only** (control register/field) means hardware logic can only write to this field. (HW can NOT read the field)
+3. Both R and W are not supported yet  for HW in Ver 1.1
+
+### Supported access type combination
+
+|  SW   |  HW  | Comment          |
+| :---: | :--: | ---------------- |
+|   R   |  W   | Status Register  |
+|   W   |  R   | Control Register |
+| FIFOR |  -   | Read from FIFO   |
+| FIFOW |  -   | Write to FIFO    |
+
+
 
 ## Register Define File Format
 
@@ -225,10 +262,18 @@ input                       reset       // reset signal
   - Register size greater than 32?
 - [ ] Add support for HW RW access type
 - [ ] Add support for HW logging and SW write clear
+- [ ] Register the input  request signal for better timing? - should be an optional feature
+
+
 
 ## Change Log
 
-10/24/2020 - Inital version (Ver 1.0) Created
+- 10/27/2020 - version (Ver 1.1) 
+    1. Added new SW access type: FIFOR and FIFOW.
+
+- 10/24/2020 - Inital version (Ver 1.0) Created
+
+
 
 ## License
 
