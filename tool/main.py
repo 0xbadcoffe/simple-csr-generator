@@ -4,7 +4,7 @@
 #
 # Project: Simple CSR Generator
 # Author: Heqing Huang
-# Date: 10/22/2020
+# Created: 10/22/2020
 #
 # Description:
 #   Main program of the Simple CSR Generator
@@ -14,7 +14,7 @@
 import sys
 sys.dont_write_bytecode = True
 import argparse
-from RegParser import RegParser
+from YmlParser import YmlParser
 from HtmlWriter import HtmlWriter
 from VerilogWriter import VerilogWriter
 import os
@@ -48,13 +48,15 @@ createDir(rtlPath)
 createDir(docPath)
 
 # Parse the yml file
-parser = RegParser(yml)
-regsInfo = parser.parserAllReg()
+parser = YmlParser(yml)
+parser.parserAllReg()
 
 # Write the HTML document
-hwriter = HtmlWriter(regsInfo, moduleName, docPath)
+hwriterInfo = parser.htmlwriter()
+hwriter = HtmlWriter(hwriterInfo, moduleName, docPath)
 hwriter.writeHtml()
 
 # Write the  Verilog File
-vwriter = VerilogWriter(regsInfo, moduleName, rtlPath)
+verilogInfo = parser.verilogwriter()
+vwriter = VerilogWriter(verilogInfo, moduleName, rtlPath)
 vwriter.writeVerilog()

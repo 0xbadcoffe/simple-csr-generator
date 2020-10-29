@@ -268,7 +268,10 @@ input                       reset       // reset signal
 
 ## Change Log
 
-- 10/27/2020 - version (Ver 1.1) 
+- 10/28/2020 - version (Ver 1.2)
+    1. Redesigned yml parser script and verilog writer script. Moved the parsing logic in verilogwriter class into parser class.
+
+- 10/27/2020 - version (Ver 1.1)
     1. Added new SW access type: FIFOR and FIFOW.
 
 - 10/24/2020 - Inital version (Ver 1.0) Created
