@@ -17,6 +17,7 @@ import argparse
 from YmlParser import YmlParser
 from HtmlWriter import HtmlWriter
 from VerilogWriter import VerilogWriter
+from DriverWriter import DriverWriter
 import os
 from shutil import rmtree
 
@@ -43,9 +44,11 @@ filePath = os.path.dirname(os.path.abspath(yml))
 moduleName = fileName.replace('.yml', '')
 rtlPath =  filePath + '/' + moduleName + '_csr/rtl' if (outdir == None) else outdir
 docPath =  filePath + '/' + moduleName + '_csr/doc' if (outdir == None) else outdir
+driPath =  filePath + '/' + moduleName + '_csr/driver' if (outdir == None) else outdir
 
 createDir(rtlPath)
 createDir(docPath)
+createDir(driPath)
 
 # Parse the yml file
 parser = YmlParser(yml)
@@ -60,3 +63,8 @@ hwriter.writeHtml()
 verilogInfo = parser.verilogwriter()
 vwriter = VerilogWriter(verilogInfo, moduleName, rtlPath)
 vwriter.writeVerilog()
+
+# Write the Driver document
+hwriterInfo = parser.htmlwriter()
+dwriter = DriverWriter(hwriterInfo, moduleName, driPath)
+dwriter.writeDriver()

@@ -7,6 +7,7 @@
   - [Access Type](#access-type)
   - [Register Define File Format](#register-define-file-format)
   - [Output Verilog Module](#output-verilog-module)
+  - [Output Verilog Module](#output-verilog-module-1)
   - [Limitation](#limitation)
   - [Change Log](#change-log)
   - [License](#license)
@@ -17,13 +18,17 @@ Simple CSR Generator: A simple **C**onfiguration **S**tatus **R**egister (CSR) g
 
 This is a small python based tool to generate verilog CSR module.
 
-It takes the register information coded in yaml file and generates verilog module, and a HTML based document.
+It takes the register information coded in yaml file and generates the following collateral:
+
+1. Verilog module
+2. HTML based documentation
+3. C header file defining register address and field information
 
 
 
 ### Current Version
 
-Ver 1.1
+Ver 1.3
 
 
 
@@ -59,6 +64,8 @@ example
 ├── pio_csr                 - the output directory
 │   ├── doc
 │   │   └── pio_csr.html    - html document
+│   ├── driver
+│   │   └── pio_csr.h       - C code
 │   └── rtl
 │       └── pio_csr.v       - rtl file
 └── pio.yml                 - the input yaml file
@@ -244,8 +251,37 @@ output [WIDTH-1:0]          o_hw_<register_name>_<field_name>   // Configuration
 
 ```verilog
 input                       clk         // clock signal
-input                       reset       // reset signal
+input                       reset       // synchronous reset signal
 ```
+
+
+
+## Output C Header File
+
+The C header file defines **register address** as well as information about each field within the registers. This file is useful for SW development.
+
+The naming convention of the register variable is `<MODULE_NAME>__<REGISTER_NAME>`
+
+The naming convention of the field variable is `<MODULE_NAME>__<REGISTER_NAME>__<FIELD_NAME>__<SUFFIX>`
+
+Examples:
+
+```c
+// Register: pio_read, Address: 0x0
+#define PIO__PIO_READ                                       0x0
+// Field: DATA, Offset: 0, Size: 32
+#define PIO__PIO_READ__DATA__OFT                            0
+#define PIO__PIO_READ__DATA__MASK                           0xffffffff
+
+
+// Register: pio_write, Address: 0x4
+#define PIO__PIO_WRITE                                      0x4
+// Field: DATA, Offset: 0, Size: 32
+#define PIO__PIO_WRITE__DATA__OFT                           0
+#define PIO__PIO_WRITE__DATA__MASK                          0xffffffff
+```
+
+
 
 ## Limitation
 
@@ -268,11 +304,14 @@ input                       reset       // reset signal
 
 ## Change Log
 
+- 10/28/2020 - version (Ver 1.3)
+  1. Added a script to write C code for the driver development
+
 - 10/28/2020 - version (Ver 1.2)
-    1. Redesigned yml parser script and verilog writer script. Moved the parsing logic in verilogwriter class into parser class.
+  1. Redesigned yml parser script and verilog writer script. Moved the parsing logic in verilogwriter class into parser class.
 
 - 10/27/2020 - version (Ver 1.1)
-    1. Added new SW access type: FIFOR and FIFOW.
+  1. Added new SW access type: FIFOR and FIFOW.
 
 - 10/24/2020 - Inital version (Ver 1.0) Created
 
