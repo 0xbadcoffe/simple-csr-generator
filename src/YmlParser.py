@@ -14,9 +14,10 @@
 #########################################################################################
 
 import yaml
+from math import log2, ceil
+
 from common import *
 from config import *
-from math import log2, ceil
 
 getRegName = lambda x: x + REG_SUFFIX
 

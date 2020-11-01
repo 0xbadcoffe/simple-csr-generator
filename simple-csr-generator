@@ -1,1 +1,20 @@
-tool/simple-csr-generator
+#!/usr/bin/python
+#########################################################################################
+# Copyright 2020 by Heqing Huang (heqinghuangusc@gmail.com)
+#
+# Project: Simple CSR Generator
+# Author: Heqing Huang
+# Created: 11/01/2020
+#
+# Description:
+#   The main executable
+#
+#########################################################################################
+
+import sys
+sys.dont_write_bytecode = True
+sys.path.append('src/')
+
+from main import main
+
+main()

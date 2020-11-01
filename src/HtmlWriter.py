@@ -11,7 +11,7 @@
 #
 #########################################################################################
 
-from common import *
+from src.common import *
 
 # Define the index for each register
 REGNAME = 0
