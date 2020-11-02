@@ -12,9 +12,12 @@
 #########################################################################################
 
 import sys
+import os
 sys.dont_write_bytecode = True
-sys.path.append('src/')
 
-from main import main
+my_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(my_path + '/src')
+
+from main import *
 
 main()

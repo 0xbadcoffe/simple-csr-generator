@@ -2,6 +2,7 @@
 
 - 10/31/2020 - Version 1.3 updates
   - Updated documents and included example files.
+  - Fixed a bug on the __get macro in c driver.
 
 - 10/28/2020 - Version 1.3
   - Added a script to write C code for the driver development

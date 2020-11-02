@@ -11,16 +11,18 @@
 #
 #########################################################################################
 
-import sys
-sys.dont_write_bytecode = True
 import argparse
 import os
+import sys
 from shutil import rmtree
 
-from src.YmlParser import YmlParser
-from src.HtmlWriter import HtmlWriter
-from src.VerilogWriter import VerilogWriter
-from src.DriverWriter import DriverWriter
+my_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(my_path + '/src')
+
+from YmlParser import YmlParser
+from HtmlWriter import HtmlWriter
+from VerilogWriter import VerilogWriter
+from DriverWriter import DriverWriter
 
 def createDir(path):
     """ Create directory """

@@ -11,7 +11,7 @@
 #
 #########################################################################################
 
-from src.common import *
+from common import *
 
 # Define the index for each register
 REGNAME = 0
@@ -78,7 +78,7 @@ class DriverWriter(object):
         oft  = f'{reg}__{name}{OFT_SUFFIX}'
         mask = f'{reg}__{name}{MSK_SUFFIX}'
         string  = f'#define {reg}__{name}{GET_SUFFIX}(data) \\\n'
-        string += f'{space1}((data >> {oft}) & {mask})\n'
+        string += f'{space1}((data & {mask}) >> {oft})\n'
         return string
 
     def setFieldStr(self, reg, name):
